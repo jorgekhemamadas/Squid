@@ -1,0 +1,73 @@
+[  sudo apt-get install squid  ]
+[  sudo systemctl start squid  ]
+[  sudo systemctl enable squid  ]
+[  cd /etc/squid  ]
+[  sudo nano squid.conf  ]
+
+CTRL + w buscamos "http_access deny all" y le colocamos un #
+quedaria algo asi #http_access deny all
+
+buscamos el puerto abierto predeterminado que seria el 3128
+CTRL + w buscamos "http_port 3128" y le colocamos un #
+quedaria algo asi #http_port 3128
+
+pegamos la siguiente configuracion debajo de "#http_port 3128"
+
+http_port 5000
+cache_mem 256 MB
+cache_dir sus /var/spool/squid 10000 16 256
+auth_param basic program /usr/lib/squid/basic_ncsa_auth /etc/squid/accesos
+acl tjs_domains dstdomain "/etc/squid/domains.acl"
+acl password proxy_auth REQUIRED
+http_access deny tjs_domains
+deny_info ERR_TJS tjs_domains
+acl all src 0.0.0.0/0.0.0.0
+http_access allow password
+http_access allow all
+
+CTRL + o guardamos los cambios y tendriamos instalado el proxy squid con password
+por ultimo abrimos el puerto establecido que seria el puerto 5000
+con el siguiente comando
+
+[  sudo ufw allow 5000  ]
+
+(reiniciamos el servicio squid)
+con con el comando
+
+[  systemctl restart squid.service  ]
+
+
+
+
+#### INFORMACION ADICIONAL ####
+
+para crear los usuarios del servicio squid
+instalamos apache2-utils
+
+[  sudo apt install apache2-utils  ]
+
+como la ruta /etc/squid/accesos no existe, la creamos con el primer usuario
+
+[  htpasswd -c /etc/squid/accesos nombredelusuario  ]
+
+
+los demas usuarios ya lo creamos sin "-c"
+
+[  htpasswd /etc/squid/accesos nombredelusuario2  ]
+
+
+#### BLOQUEAR DOMINIOS // SITIOS WEB  ####
+
+creamos el archivo domains.acl y metemos todos los dominios para bloquear
+
+[  touch /etc/squid/domains.acl  ]
+o en la misma carpeta /etc/squid/ escribimos
+[ sudo nano domains.acl  ]
+y metemos todos los dominios o sitios web a bloquear
+
+www.facebook.com
+facebook.com
+www.youtube.com
+youtube.com
+www.instagram.com
+instagram.com
